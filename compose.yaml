@@ -1,0 +1,24 @@
+services:
+ app:
+  image: webapp
+  build: ./src/scripts/app
+  ports:
+    - 8050:8050
+  profiles:
+    - application
+
+ etl:
+  image: etl-orchestrator
+  build: ./src/scripts/etl
+  profiles:
+    - development
+  environment:
+   PREFECT_API_URL: http://127.0.0.1:4200/api
+   PREFECT_HOME: /etl/.prefect
+  ports:
+   - 4200:4200
+  volumes:
+    - ./data/prefect:/etl/.prefect
+  depends_on:
+   app:
+    condition: service_healthy

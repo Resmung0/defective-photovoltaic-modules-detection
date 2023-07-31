@@ -1,0 +1,40 @@
+repos:
+  - repo: 'https://github.com/pre-commit/pre-commit-hooks'
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+  - repo: 'https://github.com/psf/black'
+    rev: 23.1.0
+    hooks:
+      - id: black
+  - repo: 'https://github.com/PyCQA/isort'
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: 'https://github.com/econchick/interrogate'
+    rev: 1.5.0
+    hooks:
+      - id: interrogate
+        args:
+          - '-v'
+          - '--fail-under=95'
+          - '--ignore-init-method'
+          - '--ignore-init-module'
+  - repo: 'https://github.com/python-poetry/poetry'
+    rev: 1.4.0
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types:
+          - python
+        args:
+          - '-rn'
+          - '-sn'
+          - '--load-plugins=pylint.extensions.docparams'

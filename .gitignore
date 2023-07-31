@@ -1,0 +1,22 @@
+# Caches
+__pycache__/
+.pytest_cache
+
+# Environment
+.venv
+poetry.toml
+.env
+.kaggle
+.vscode
+
+# Jupyter notebooks
+notebooks
+
+# Logs
+logs
+
+# data
+data
+
+# ML models
+models

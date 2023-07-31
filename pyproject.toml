@@ -1,0 +1,73 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.0.1"
+tag_format = "$version"
+update_changelog_on_bump = true
+
+[tool.pytest]
+testpaths = "src.tests"
+
+[tool.poetry]
+name = "defective_photovoltaic_modules_detection"
+version = "0.0.1"
+description = "Automated detection of defected photovoltaic modules using thermal images."
+authors = ["Marcos Gabriel <mg.21191077@gmail>"]
+license = "MIT"
+readme = ["README.md"]
+repository = "https://github.com/Resmung0/defective-photovoltaic-modules-detection"
+packages = [
+	{include = "scripts", from = "src"},
+	{include = "tests", from = "src"}
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+python-dotenv = "^1.0.0"
+duckdb = "^0.8.1"
+tqdm = "^4.65.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.2.0"
+pylint = "^2.17.0"
+ipykernel = "^6.21.3"
+ipywidgets = "^8.0.6"
+commitizen = "^2.42.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "~7.2.2"
+pytest-mock = "^3.10.0"
+pandera = "^0.15.1"
+hypothesis = "^6.76.0"
+
+[tool.poetry.group.image-processing.dependencies]
+flyr ="^3.3.1"
+scikit-image = "^0.21.0"
+opencv-python = "^4.8.0"
+norfair = "^2.2.0"
+matplotlib = "^3.7.2"
+seaborn = "^0.12.2"
+albumentations = "^1.3.1"
+
+[tool.poetry.group.machine-learning.dependencies]
+torch = "^2.0.1"
+torchvision = "^0.15.2"
+lightning = "^2.0.6"
+dvc = "^2.58.1"
+hydra-core = "^1.3.2"
+statsmodels = "^0.14.0"
+
+[tool.poetry.group.etl.dependencies]
+kaggle = "^1.5.13"
+pandas = "^1.5.3"
+prefect = "^2.10.13"
+meteostat = "^1.6.5"
+exif = "^1.6.0"
+
+[tool.poetry.group.app.dependencies]
+dash = "^2.11.1"
+fastapi = ">=0.98.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
