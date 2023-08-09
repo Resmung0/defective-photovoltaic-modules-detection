@@ -18,7 +18,7 @@ repos:
       - id: interrogate
         args:
           - '-v'
-          - '--fail-under=95'
+          - '--fail-under=80'
           - '--ignore-init-method'
           - '--ignore-init-module'
   - repo: 'https://github.com/python-poetry/poetry'

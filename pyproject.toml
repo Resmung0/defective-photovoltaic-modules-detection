@@ -55,6 +55,9 @@ lightning = "^2.0.6"
 dvc = "^2.58.1"
 hydra-core = "^1.3.2"
 statsmodels = "^0.14.0"
+sahi = "^0.11.14"
+captum = "^0.6.0"
+tidecv = "^1.0.1"
 
 [tool.poetry.group.etl.dependencies]
 kaggle = "^1.5.13"
