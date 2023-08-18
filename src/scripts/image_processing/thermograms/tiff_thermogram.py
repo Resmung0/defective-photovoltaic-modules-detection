@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
-from pandas import read_csv
-from skimage.io import imread
+import pandas as pd
+from flyr import palettes
+from skimage import io
 
 from .interface import Thermogram
 
@@ -19,7 +19,7 @@ class TIFFThermogram(Thermogram):
         image_path: str,
         metadata_path: str | None = None,
         optical_path: str | None = None,
-        method: str = "ThermoMAP",
+        method: str = "thermomap",
     ) -> None:
         """
 
@@ -32,9 +32,9 @@ class TIFFThermogram(Thermogram):
             method (Optional[str], optional): Type of method to process
             tiff thermograms ('thermomap', 'other'). Defaults to "ThermoMAP".
         """
-        self.path = Path(image_path)
-        self.metadata_path = Path(metadata_path)
-        self.optical_path = Path(optical_path)
+        self.__path = Path(image_path)
+        self.__metadata_path = Path(metadata_path) if metadata_path else None
+        self.__optical_path = Path(optical_path) if optical_path else None
 
         match method:
             case "thermomap":
@@ -51,7 +51,7 @@ class TIFFThermogram(Thermogram):
         Returns:
             str: Thermogram file name.
         """
-        return self.path.name
+        return self.__path.name
 
     @property
     def raw(self) -> np.ndarray:
@@ -60,7 +60,7 @@ class TIFFThermogram(Thermogram):
         Returns:
             np.ndarray: Thermogram 16 bit image.
         """
-        return imread(self.path.resolve())
+        return io.imread(self.__path.resolve())
 
     @property
     def kelvin(self) -> np.ndarray:
@@ -96,7 +96,9 @@ class TIFFThermogram(Thermogram):
         Returns:
             np.ndarray: Thermogram embedded photo.
         """
-        return imread(self.optical_path.resolve())
+        if self.__optical_path:
+            return io.imread(self.__optical_path.resolve())
+        return None
 
     @property
     def metadata(self) -> dict[str, str | int]:
@@ -105,29 +107,41 @@ class TIFFThermogram(Thermogram):
         Returns:
             dict[str, str | int]: Metadata that build the thermogram.
         """
-        return read_csv(self.metadata_path.resolve())
+        if self.__metadata_path:
+            return pd.read_csv(self.__metadata_path.resolve())
+        return None
 
     def render(
-        self,
-        min_v: Optional[float] = None,
-        max_v: Optional[float] = None,
+        self, min_v: float = None, max_v: float = None, palette: str = "grayscale"
     ) -> np.ndarray:
         """Renders the thermogram to RGB with the given settings.
 
         Args:
-            min_v (Optional[float], optional): Minimal value to consider the
+            min_v (float, optional): Minimal value to consider the
             thermogram's temperature range. Defaults to None.
-            max_v (Optional[float], optional): Maximal value to consider the
+            max_v (float, optional): Maximal value to consider the
             thermogram's temperature range. Defaults to None.
+            palette (str, optional): Palette to render the thermogram.
+            Default to "grayscale".
 
         Returns:
             np.ndarray: A three dimensional array of integers between 0 and 255,
             representing an RGB render of the thermogram.
         """
-        max_value = np.max(self.kelvin) if max_v is None else max_v
-        min_value = np.min(self.kelvin) if min_v is None else min_v
-        thermal_img = (self.kelvin - min_value) / (max_value - min_value)
-        return (thermal_img * 255.0).astype("uint8")
+        # Normalize the raw image
+        max_value = np.max(self.kelvin) if max_v else max_v
+        min_value = np.min(self.kelvin) if min_v else min_v
+        normalized = (self.kelvin - min_value) / (max_value - min_value)
+
+        # Apply the chosen palette
+        if palette in ["grayscale", "grayscale-inverted"]:
+            normalized = (normalized * 255.0).astype("uint8")
+            normalized = np.broadcast_to(normalized[..., None], normalized.shape + (3,))
+            if palette == "grayscale-inverted":
+                normalized = np.invert(normalized)
+        else:
+            normalized = palettes.map_colors(normalized, palette)
+        return normalized
 
     def adjust_metadata(self) -> TIFFThermogram:
         """Adjust the metadata that build the thermogram.

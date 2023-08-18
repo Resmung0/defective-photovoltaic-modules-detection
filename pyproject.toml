@@ -47,10 +47,10 @@ norfair = "^2.2.0"
 matplotlib = "^3.7.2"
 seaborn = "^0.12.2"
 albumentations = "^1.3.1"
+imagecodecs = "^2023.8.12"
 
 [tool.poetry.group.machine-learning.dependencies]
-torch = "^2.0.1"
-torchvision = "^0.15.2"
+torch = ">=2.0.0, !=2.0.1"
 lightning = "^2.0.6"
 dvc = "^2.58.1"
 hydra-core = "^1.3.2"
