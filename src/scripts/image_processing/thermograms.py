@@ -1,6 +1,8 @@
-""""File to define the thermograms."""
+"""File that define the thermograms."""
+
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 import numpy as np
@@ -8,7 +10,93 @@ import pandas as pd
 from flyr import palettes
 from skimage import io
 
-from .interface import Thermogram
+
+class Thermogram(ABC):
+    """Base class that implements thermogram image."""
+
+    @property
+    @abstractmethod
+    def identifier(self) -> str:
+        """Thermogram file name.
+
+        Returns:
+            str: Thermogram file name.
+        """
+        return NotImplementedError()
+
+    @property
+    @abstractmethod
+    def kelvin(self) -> np.ndarray:
+        """Thermogram's temperature in Kelvin (K).
+
+        Returns:
+            np.ndarray: Thermogram temperature in Kelvin.
+        """
+        return NotImplementedError()
+
+    @property
+    @abstractmethod
+    def celsius(self) -> np.ndarray:
+        """Thermogram's temperature in celsius (°C).
+
+        Returns:
+            np.ndarray: Thermogram temperature in Celsius.
+        """
+        return NotImplementedError()
+
+    @property
+    @abstractmethod
+    def fahrenheit(self) -> np.ndarray:
+        """Thermogram's temperature in Fahrenheit (°F).
+
+        Returns:
+            np.ndarray: Thermogram temperature in Fahrenheit.
+        """
+        return NotImplementedError()
+
+    @property
+    @abstractmethod
+    def optical(self) -> np.ndarray:
+        """The thermogram's embedded photo.
+
+        Returns:
+            np.ndarray: Thermogram embedded photo.
+        """
+        return NotImplementedError()
+
+    @property
+    @abstractmethod
+    def metadata(self) -> dict[str, str | int]:
+        """Metadata related to thermogram temperature data.
+
+        Returns:
+            dict[str, str | int]: Metadata that build the thermogram.
+        """
+        return NotImplementedError()
+
+    @abstractmethod
+    def render(
+        self, min_v: float = None, max_v: float = None, palette: str = "grayscale"
+    ) -> np.ndarray:
+        """Renders the thermogram, transforming it into a 8-bit image with the given settings.
+
+        Args:
+            min_v (float, optional): Minimal value to consider the
+            thermogram's temperature range. Defaults to None.
+            max_v (float, optional): Maximal value to consider the
+            thermogram's temperature range. Defaults to None.
+            palette (str, optional): Palette to render the thermogram.
+            Default to "grayscale".
+
+        Returns:
+            np.ndarray: Thermogram rendered to a 8 bit image.
+        """
+        return NotImplementedError()
+
+    @abstractmethod
+    def adjust_metadata(self) -> Thermogram:
+        """Adjust the metadata that build the thermogram."""
+        return NotImplementedError()
 
 
 class TIFFThermogram(Thermogram):
@@ -112,9 +200,13 @@ class TIFFThermogram(Thermogram):
         return None
 
     def render(
-        self, min_v: float = None, max_v: float = None, palette: str = "grayscale"
+        self,
+        min_v: float = None,
+        max_v: float = None,
+        palette: str = "grayscale",
+        unit: str = "kelvin",
     ) -> np.ndarray:
-        """Renders the thermogram to RGB with the given settings.
+        """Renders the thermogram, transforming it into a 8-bit image with the given settings.
 
         Args:
             min_v (float, optional): Minimal value to consider the
@@ -123,15 +215,25 @@ class TIFFThermogram(Thermogram):
             thermogram's temperature range. Defaults to None.
             palette (str, optional): Palette to render the thermogram.
             Default to "grayscale".
+            unit (str, optional): Unit to compute the thermal image.
+            Default to "kelvin".
 
         Returns:
-            np.ndarray: A three dimensional array of integers between 0 and 255,
-            representing an RGB render of the thermogram.
+            np.ndarray: Thermogram rendered to a 8 bit image.
         """
+        # Choose thermal image type
+        match unit:
+            case "celsius":
+                thermal_image = self.celsius
+            case "fahrenheit":
+                thermal_image = self.fahrenheit
+            case _:
+                thermal_image = self.kelvin
+
         # Normalize the raw image
-        max_value = np.max(self.kelvin) if max_v else max_v
-        min_value = np.min(self.kelvin) if min_v else min_v
-        normalized = (self.kelvin - min_value) / (max_value - min_value)
+        max_value = np.max(thermal_image) if max_v else max_v
+        min_value = np.min(thermal_image) if min_v else min_v
+        normalized = (thermal_image - min_value) / (max_value - min_value)
 
         # Apply the chosen palette
         if palette in ["grayscale", "grayscale-inverted"]:

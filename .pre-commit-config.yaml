@@ -26,6 +26,8 @@ repos:
     hooks:
       - id: poetry-check
       - id: poetry-lock
+        args:
+          - '--no-update'
   - repo: local
     hooks:
       - id: pylint

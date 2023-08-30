@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from skimage.measure import regionprops, regionprops_table
 
-from scripts.utils.dataset import read_annotation
+from .utils import read_annotation
 
 
 class Mask:
@@ -60,11 +60,11 @@ class Mask:
         return label_mask.astype("uint8")
 
     @property
-    def binary_mask(self) -> np.ndarray[int]:
+    def binary_mask(self) -> np.ndarray:
         """Binary mask creation from label mask.
 
         Returns:
-            np.ndarray[int]: Binary mask array.
+            np.ndarray: Binary mask array.
         """
         return np.where(self.label_mask != 0, 1, 0).astype(np.uint8)
 
@@ -93,10 +93,9 @@ class Mask:
                 str: Mask type.
             """
 
+            mask_type = "medium"
             if area < min_limit:
                 mask_type = "small"
-            elif min_limit < area < max_limit:
-                mask_type = "medium"
             elif area > max_limit:
                 mask_type = "large"
             return mask_type

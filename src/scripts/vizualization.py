@@ -9,7 +9,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage import color
 from skimage.segmentation import find_boundaries
 
-from scripts.image_processing.mask import Mask
+from .image_processing.mask import Mask
 
 
 def show_thermal_image(
